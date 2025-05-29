@@ -19,11 +19,15 @@ app.get('/', (req, res) => {
 
 // Stripe requires the raw body to construct the event
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  // Log immediately upon receiving a request to /webhook
+  console.log(`!!! POST request to /webhook received at ${new Date().toISOString()} !!!`);
+  console.log('Request Headers:', JSON.stringify(req.headers, null, 2)); // Log all headers
+
   const sig = req.headers['stripe-signature'];
   let event;
 
   // Enhanced logging for debugging signature verification
-  console.log('Received Stripe Webhook Request:');
+  console.log('Attempting to process Stripe Webhook Request:'); // Changed log message slightly
   console.log('Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Raw Body Type:', typeof req.body);
   if (Buffer.isBuffer(req.body)) {
