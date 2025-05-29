@@ -1,0 +1,22 @@
+{
+  "name": "stripe-webhook-service",
+  "version": "1.0.0",
+  "description": "Stripe Webhook handler for HostGenie",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.1",
+    "stripe": "^14.0.0" 
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
