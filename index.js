@@ -1,13 +1,40 @@
 require('dotenv').config();
+
+// --- Initial Environment Variable Check ---
+console.log('--- Initial Environment Variable Check ---');
+console.log('STRIPE_SECRET_KEY loaded:', !!process.env.STRIPE_SECRET_KEY, '(first 5 chars):', process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.substring(0, 5) + '...' : 'NOT SET');
+console.log('STRIPE_WEBHOOK_SECRET loaded:', !!process.env.STRIPE_WEBHOOK_SECRET, '(first 10 chars):', process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'NOT SET');
+console.log('SUPABASE_URL loaded:', !!process.env.SUPABASE_URL, 'Value:', process.env.SUPABASE_URL || 'NOT SET');
+console.log('SUPABASE_SERVICE_ROLE_KEY loaded:', !!process.env.SUPABASE_SERVICE_ROLE_KEY, '(first 10 chars):', process.env.SUPABASE_SERVICE_ROLE_KEY ? process.env.SUPABASE_SERVICE_ROLE_KEY.substring(0, 10) + '...' : 'NOT SET');
+console.log('PORT variable from Railway:', process.env.PORT || 'NOT SET (will default in app)');
+console.log('--- End Initial Environment Variable Check ---');
+
 const express = require('express');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Ensure this is the service_role key
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Stripe and Supabase clients AFTER checking env vars
+let stripe;
+try {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is not set');
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+} catch (e) {
+  console.error('Failed to initialize Stripe client:', e.message);
+  // process.exit(1); // Optionally exit if critical
+}
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+let supabase;
+try {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl) throw new Error('SUPABASE_URL is not set');
+  if (!supabaseKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
+  const { createClient } = require('@supabase/supabase-js');
+  supabase = createClient(supabaseUrl, supabaseKey);
+} catch (e) {
+  console.error('Failed to initialize Supabase client:', e.message);
+  // process.exit(1); // Optionally exit if critical
+}
+
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET; // This will be checked again before use
 
 const app = express();
 const PORT = process.env.PORT || 3003;
